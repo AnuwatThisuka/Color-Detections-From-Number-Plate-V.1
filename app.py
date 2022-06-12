@@ -47,8 +47,11 @@ h_upper = 179
 s_upper = 255
 v_upper = 255
 
-
+#! ---Set up video capture for ip camera
 url = 'rtsp://10.1.76.236:554/live/0/SUB'
+#! -------------------------------- #
+
+#** ---Loading Model for detection Number plate--- **#
 plateCascade = cv2.CascadeClassifier(
     "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\haarcascade_russian_plate_number.xml")
 minArea = 500
@@ -103,7 +106,7 @@ while(1):
                 print(data2)
                 break
             break
-        if data2 == 1 and start_Model_1 == False and start_Model_2 == False:
+        if data2 == 1 and start_Model_1 == False and start_Model_2 == False and start_Model_3 == False:
             # print("Data 2 = 1")
             import cv2
             import numpy as np
@@ -135,6 +138,13 @@ while(1):
                     start_Model_2 = True
                     return start_Model_2
                 start_Model1()
+                break
+            elif ("1234009" in Model_number) == True:
+                def start_Model2():
+                    global start_Model_3
+                    start_Model_3 = True
+                    return start_Model_3
+                start_Model2()
                 break
             elif ("0000000" in Model_number) == True:
                 def Reset():
@@ -193,8 +203,8 @@ while(1):
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
-        #------------------------------end of start model 1-------------------------------------------#
-        # Start Model 1
+        #*------------------------------end of start model 1-------------------------------------------#
+        # * Start Model 2
         while start_Model_2 == True:
             blur = cv2.blur(img, (25, 25))
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
@@ -243,7 +253,58 @@ while(1):
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
-        #-------------------------------------end Model 2---------------------------------------------#
+        #* -------------------------------------end Model 2---------------------------------------------#
+
+        # * Start Model 3
+        while start_Model_2 == True:
+            blur = cv2.blur(img, (25, 25))
+            hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+
+            lower = np.array(
+                [h_lower, s_lower, v_lower], np.uint8)
+            upper = np.array(
+                [h_upper, s_upper, v_upper], np.uint8)
+
+            blue = cv2.inRange(hsv, lower, upper)
+            kernal = np.ones((5, 5), "uint8")
+            blue = cv2.dilate(blue, kernal)
+            res_blue = cv2.bitwise_and(img, img, mask=blue)
+            cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
+                img, counter_line)[0], img.shape[0]-bord), (255, 0, 0), 2)
+            cv2.line(img, (x_line(img, counter_line)[1], bord), (x_line(
+                img, counter_line)[1], img.shape[0]-bord), (255, 0, 0), 2)
+            cv2.line(img, (x_line(img, counter_line)[2], bord), (x_line(
+                img, counter_line)[2], img.shape[0]-bord), (255, 0, 0), 2)
+            contours, hierarchy = cv2.findContours(
+                blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                if(area > 10000):
+                    x, y, w, h = cv2.boundingRect(contour)
+                    center = center_point(x, y, w, h)
+                    cv2.circle(img, center, 5, (0, 0, 255), -1)
+                    img = cv2.rectangle(
+                        img, (x, y), (x + w, y + h), object_color, 2)
+                    detect_line.append(center)
+                    for x, y in detect_line:
+                        if (x < x_line(img, counter_line)[2] and x > x_line(img, counter_line)[0] and state == 0):
+                            state = 1
+                        if (x < x_line(img, counter_line)[2] and x > x_line(img, counter_line)[1]-20):
+                            cv2.line(img, (x_line(img, counter_line)[1], bord), (x_line(
+                                img, counter_line)[1], img.shape[0]-bord), (0, 255, 0), 2)
+                            cv2.line(img, (x_line(img, counter_line)[2], bord), (x_line(
+                                img, counter_line)[2], img.shape[0]-bord), (0, 255, 0), 2)
+                            if (x < x_line(img, counter_line)[1]) and state == 1:
+                                state = 0
+                                countfunc(count)
+                                # print("Counter: ", counfunc(count))
+                                cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
+                                    img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
+                        detect_line.remove((x, y))
+            cv2.putText(img, str(counter), (550, 450),
+                        cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
+            break
+        #** -------------------------------------end Model 3---------------------------------------------#
         cv2.imshow("IIOT-B14", img)
         if cv2.waitKey(1) & 0xFF == ord('s'):
             cv2.imwrite(
