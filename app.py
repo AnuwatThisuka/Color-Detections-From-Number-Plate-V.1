@@ -146,7 +146,6 @@ while(1):
         # **------------------------------end of confirm function start-------------------------------------------#
         # **Start Model 1
         while start_Model_1 == True:
-            print("Start fuctions counter Model 234500")
             blur = cv2.blur(img, (25, 25))
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
@@ -197,7 +196,6 @@ while(1):
         #------------------------------end of start model 1-------------------------------------------#
         # Start Model 1
         while start_Model_2 == True:
-            print("Start fuctions counter Model 1234008")
             blur = cv2.blur(img, (25, 25))
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
