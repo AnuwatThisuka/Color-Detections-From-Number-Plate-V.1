@@ -133,8 +133,8 @@ while(1):
                     return start_Model_2
                 start_Model1()
                 break
-        #------------------------------end of confirm function start-------------------------------------------#
-        # Start Model 1
+        # **------------------------------end of confirm function start-------------------------------------------#
+        # **Start Model 1
         while start_Model_1 == True:
             print("Start fuctions counter Model 234500")
             blur = cv2.blur(img, (25, 25))
