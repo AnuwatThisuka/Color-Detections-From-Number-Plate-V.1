@@ -5,10 +5,12 @@ from re import A
 import cv2
 import numpy as np
 
+# ?---Set frame
 frameWidth = 640  # Frame Width
 franeHeight = 480   # Frame Height
-
 #-------------------------------------------------------------------------------------#
+
+# ?--Define center point of detected
 
 
 def center_point(x, y, w, h):
@@ -69,10 +71,11 @@ def countfunc(count):
     return counter
 
 
-# main function start
+#** -----------------------------------main function start-----------------------------------------**#
 start_Model_1 = False
 start_Model_2 = False
-#-----------------------------------------------------------------------------------------------------#
+#** -----------------------------------------------------------------------------------------------**#
+
 while(1):
     while(1):
         success, img = cap.read()
@@ -118,7 +121,7 @@ while(1):
             print(Model)
             Model_number = (Model)
 
-            #-----------------------------main confirm function start-----------------------------------#
+            # **-----------------------------main confirm function start-----------------------------------#
             if ("234500" in Model_number) == True:
                 def start_Model():
                     global start_Model_1
@@ -132,6 +135,13 @@ while(1):
                     start_Model_2 = True
                     return start_Model_2
                 start_Model1()
+                break
+            elif ("0000000" in Model_number) == True:
+                def Reset():
+                    global data2
+                    data2 = 0
+                    return data2
+                Reset()
                 break
         # **------------------------------end of confirm function start-------------------------------------------#
         # **Start Model 1
