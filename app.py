@@ -1,5 +1,5 @@
 #  -------------------------------------------------------------
-#   (IIOT-B14) SNC Former Public Company Limited (Rayong).  All rights reserved.
+#   (IIOT-B14) All rights reserved.
 #   This file is part of the IIOT-B14 project. Counter part of line "Painting B14"
 #   Created by : IIOT-B14 on 2022/06/06
 #  -------------------------------------------------------------
@@ -73,6 +73,7 @@ minArea = 500
 #!! ------------------------------------------------------------- #
 
 
+#!! ---------------------------- Config State For Counter System -------------------------------- !!#
 cap = cv2.VideoCapture(0)
 cap.set(3, frameWidth)
 cap.set(4, franeHeight)
@@ -118,7 +119,7 @@ while(1):
                     state = 0
                     print("Find Number Plate OK")
                     cv2.imwrite(
-                        "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model"".jpg", imgRoi)
+                        "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model"".jpg", imgRoi)
 
                     def start_functions():
                         # print("Start Functions")
@@ -137,9 +138,9 @@ while(1):
             import pytesseract
             import os
             from PIL import Image
-            pytesseract.pytesseract.tesseract_cmd = r"C://Program Files (x86)//Tesseract-OCR//tesseract.exe"
+            pytesseract.pytesseract.tesseract_cmd = r"C://Program Files//Tesseract-OCR//tesseract.exe"
             img = cv2.imread(
-                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model.jpg")
+                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model.jpg")
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             adaptive_threshold = cv2.adaptiveThreshold(
                 gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
@@ -163,6 +164,7 @@ while(1):
                     start_Model_2 = True
                     return start_Model_2
                 start_Model1()
+                print("Model 1234008 is detected")
                 break
             elif ("1234009" in Model_number) == True:
                 def start_Model2():
@@ -170,6 +172,7 @@ while(1):
                     start_Model_3 = True
                     return start_Model_3
                 start_Model2()
+                print("Model 1234009 is detected")
                 break
             elif ("0000000" in Model_number) == True:
                 def Reset():
@@ -235,7 +238,7 @@ while(1):
                                 cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
                                     img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
                         detect_line.remove((x, y))
-            #** ----------------------------------------- Functions Reset -------------------------------- **#
+            #** ----------------------------------------- Functions main Reset --------------------------------------- **#
             imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             numberPlates = plateCascade .detectMultiScale(
                 imgGray, scaleFactor=1.05, minNeighbors=7)
@@ -257,28 +260,62 @@ while(1):
                         function_Reset()
                         break
                     break
-            #** ----------------------------------------- Functions OCR Reset -------------------------------- **#
             if Reset_Counters == True:
                 import cv2
                 import numpy as np
                 import pytesseract
                 import os
                 from PIL import Image
-                pytesseract.pytesseract.tesseract_cmd = r"C://Program Files (x86)//Tesseract-OCR//tesseract.exe"
+                pytesseract.pytesseract.tesseract_cmd = r"C://Program Files//Tesseract-OCR//tesseract.exe"
                 img = cv2.imread(
-                    "C:\\Users\\nuttawut-put\\Desktop\\IIOT-B14\\Painting_Auto\\RESET\\RESET.jpg")
+                    "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\RESET\\RESET.jpg")
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 adaptive_threshold = cv2.adaptiveThreshold(
                     gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
                 Model_Reset = pytesseract.image_to_string(
                     adaptive_threshold, lang='eng', config='--psm 10')
                 print(Model_Reset)
-                break
+                #** --------------------------------- Reset All State From Counter System started ----------------------------------- **#
+                if ("00RE00" in Model_Reset):
+                    print("Model Reset")
+
+                    def Reset_1():
+                        global Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                        Reset_Counters = False
+                        start_Model_1 = False
+                        start_Model_2 = False
+                        start_Model_3 = False
+                        data2 = 0
+                        count = 0
+                        return Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                    Reset_1()
+                    break
+                else:
+                    def Reset():
+                        global data2
+                        data2 = 0
+                        return data2
+                    Reset()
+
+                    def Reset_1():
+                        global Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                        Reset_Counters = False
+                        start_Model_1 = False
+                        start_Model_2 = False
+                        start_Model_3 = False
+                        data2 = 0
+                        count = 0
+                        return Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                    Reset_1()
+                    print("Reset System")
+                    break
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
+         #** ----------------------------------------- End of Functions OCR Reset -------------------------------- **#
+
         #*---------------------------------------End of Start Model 1-------------------------------------------#
-        # * Start Model 2
+        #*--- Start Model 2 ---**#
         while start_Model_2 == True:
             blur = cv2.blur(img, (25, 25))
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
@@ -324,9 +361,81 @@ while(1):
                                 cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
                                     img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
                         detect_line.remove((x, y))
+            #** ----------------------------------------- Functions main Reset --------------------------------------- **#
+            imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            numberPlates = plateCascade .detectMultiScale(
+                imgGray, scaleFactor=1.05, minNeighbors=7)
+            for (x, y, w, h) in numberPlates:
+                area1 = w * h
+                if area1 > minArea and Reset_Counters == False:
+                    cv2.rectangle(img, (x, y), (x+w, y+h), (255, 255, 0), 2)
+                    number = numberPlates[0]
+                    imRoi = img[y:y+h, x:x+w]
+                    if area1 > 100000 and Reset_Counters == False:
+                        cv2.imwrite(
+                            "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\RESET\\RESET.jpg", imgRoi)
+                        print(area1)
+
+                        def function_Reset():
+                            global Reset_Counters
+                            Reset_Counters = True
+                            return Reset_Counters
+                        function_Reset()
+                        break
+                    break
+            if Reset_Counters == True:
+                import cv2
+                import numpy as np
+                import pytesseract
+                import os
+                from PIL import Image
+                pytesseract.pytesseract.tesseract_cmd = r"C://Program Files//Tesseract-OCR//tesseract.exe"
+                img = cv2.imread(
+                    "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\RESET\\RESET.jpg")
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                adaptive_threshold = cv2.adaptiveThreshold(
+                    gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
+                Model_Reset = pytesseract.image_to_string(
+                    adaptive_threshold, lang='eng', config='--psm 10')
+                print(Model_Reset)
+                #** --------------------------------- Reset All State From Counter System started ----------------------------------- **#
+                if ("00RE00" in Model_Reset):
+                    print("Model Reset")
+
+                    def Reset_1():
+                        global Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                        Reset_Counters = False
+                        start_Model_1 = False
+                        start_Model_2 = False
+                        start_Model_3 = False
+                        data2 = 0
+                        count = 0
+                        return Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                    Reset_1()
+                    break
+                else:
+                    def Reset():
+                        global data2
+                        data2 = 0
+                        return data2
+                    Reset()
+
+                    def Reset_1():
+                        global Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                        Reset_Counters = False
+                        start_Model_1 = False
+                        start_Model_2 = False
+                        start_Model_3 = False
+                        data2 = 0
+                        count = 0
+                        return Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                    Reset_1()
+                    print("Reset System")
+                    break
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
+         #** ----------------------------------------- End of Functions OCR Reset -------------------------------- **#
         #* -------------------------------------End of Start Model 2---------------------------------------------#
 
         #* ---Start Model 3--- *#
@@ -375,16 +484,88 @@ while(1):
                                 cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
                                     img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
                         detect_line.remove((x, y))
+            #** ----------------------------------------- Functions main Reset --------------------------------------- **#
+            imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            numberPlates = plateCascade .detectMultiScale(
+                imgGray, scaleFactor=1.05, minNeighbors=7)
+            for (x, y, w, h) in numberPlates:
+                area1 = w * h
+                if area1 > minArea and Reset_Counters == False:
+                    cv2.rectangle(img, (x, y), (x+w, y+h), (255, 255, 0), 2)
+                    number = numberPlates[0]
+                    imRoi = img[y:y+h, x:x+w]
+                    if area1 > 100000 and Reset_Counters == False:
+                        cv2.imwrite(
+                            "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\RESET\\RESET.jpg", imgRoi)
+                        print(area1)
+
+                        def function_Reset():
+                            global Reset_Counters
+                            Reset_Counters = True
+                            return Reset_Counters
+                        function_Reset()
+                        break
+                    break
+            if Reset_Counters == True:
+                import cv2
+                import numpy as np
+                import pytesseract
+                import os
+                from PIL import Image
+                pytesseract.pytesseract.tesseract_cmd = r"C://Program Files//Tesseract-OCR//tesseract.exe"
+                img = cv2.imread(
+                    "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\RESET\\RESET.jpg")
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                adaptive_threshold = cv2.adaptiveThreshold(
+                    gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
+                Model_Reset = pytesseract.image_to_string(
+                    adaptive_threshold, lang='eng', config='--psm 10')
+                print(Model_Reset)
+                #** --------------------------------- Reset All State From Counter System started ----------------------------------- **#
+                if ("00RE00" in Model_Reset):
+                    print("Model Reset")
+
+                    def Reset_1():
+                        global Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                        Reset_Counters = False
+                        start_Model_1 = False
+                        start_Model_2 = False
+                        start_Model_3 = False
+                        data2 = 0
+                        count = 0
+                        return Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                    Reset_1()
+                    break
+                else:
+                    def Reset():
+                        global data2
+                        data2 = 0
+                        return data2
+                    Reset()
+
+                    def Reset_1():
+                        global Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                        Reset_Counters = False
+                        start_Model_1 = False
+                        start_Model_2 = False
+                        start_Model_3 = False
+                        data2 = 0
+                        count = 0
+                        return Reset_Counters, start_Model_1, start_Model_2, start_Model_3, data2, count
+                    Reset_1()
+                    print("Reset System")
+                    break
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
-        #** -------------------------------------End of Start Model 3---------------------------------------------#
+         #** ----------------------------------------- End of Functions OCR Reset --------------------------------------- **#
+        #** -----------------------------------------------End of Start Model 3------------------------------------------- **#
 
         #** -----------------------------------------Steam Show Counter System---------------------------------------------#
         cv2.imshow("IIOT-B14", img)
         if cv2.waitKey(1) & 0xFF == ord('s'):
             cv2.imwrite(
-                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model-"+str(count)+".jpg", img)
+                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model-"+str(count)+".jpg", img)
             cv2.rectangle(img, (0, 200), (640, 300), (0, 255, 0), cv2.FILLED)
             cv2.putText(img, "Scan Number", (15, 265),
                         cv2.FONT_HERSHEY_COMPLEX, 2, (0, 0, 255), 2)
