@@ -1,3 +1,9 @@
+#  -------------------------------------------------------------
+#   (IIOT-B14) SNC Former Public Company Limited (Rayong).  All rights reserved.
+#   This file is part of the IIOT-B14 project. Counter part of line "Painting B14"
+#   Created by : IIOT-B14 on 2022/06/06
+#  -------------------------------------------------------------
+
 from matplotlib.pyplot import gray
 import re
 from itertools import count
@@ -5,12 +11,12 @@ from re import A
 import cv2
 import numpy as np
 
-# ?---Set frame
+#** --- Set frame --- **#
 frameWidth = 640  # Frame Width
 franeHeight = 480   # Frame Height
-#-------------------------------------------------------------------------------------#
+#** -------------------------------------------------------------------------------------#
 
-# ?--Define center point of detected
+#!! --Define center point of detected
 
 
 def center_point(x, y, w, h):
@@ -19,6 +25,9 @@ def center_point(x, y, w, h):
     cx = int(x+ww)
     cy = int(y+hh)
     return cx, cy
+#!!-------------------------------------------------------------------------------------#
+
+#!! --Define counter line--- !!#
 
 
 def x_line(img, percent):
@@ -26,8 +35,10 @@ def x_line(img, percent):
     left_line = posit - each_line
     right_line = posit + each_line
     return posit, left_line, right_line
+#!!-------------------------------------------------------------------------------------#
 
 
+#** -------------------------- Config Other Variable -----------------------------------#
 counter_line = 50
 each_line = 50
 text_color = (0, 255, 0)
@@ -38,14 +49,16 @@ error = 100
 detect_line = []
 counter = 0
 state = 0
-# lower color detection
+#** -------------------------------- lower color detection --------------------------------#
 h_lower = 94
 s_lower = 36
 v_lower = 134
-# upper color detection
+#** -------------------------------- upper color detection --------------------------------#
 h_upper = 179
 s_upper = 255
 v_upper = 255
+#** -------------------------------------------------------------------------------------- **#
+
 
 #! ---Set up video capture for ip camera
 url = 'rtsp://10.1.76.236:554/live/0/SUB'
@@ -54,7 +67,11 @@ url = 'rtsp://10.1.76.236:554/live/0/SUB'
 #** ---Loading Model for detection Number plate--- **#
 plateCascade = cv2.CascadeClassifier(
     "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\haarcascade_russian_plate_number.xml")
+
+#!! -----------------------------Setting Rang Detected of Number plate -------------------------------- #
 minArea = 500
+#!! ------------------------------------------------------------- #
+
 
 cap = cv2.VideoCapture(0)
 cap.set(3, frameWidth)
@@ -68,17 +85,22 @@ success, img = cap.read()
 left_line = x_line(img, counter_line)[1] - each_line
 
 
+#** ---function for counter line--- **#
 def countfunc(count):
     global counter
     counter = counter + 1
     return counter
 
 
-#** -----------------------------------main function start-----------------------------------------**#
+#** -----------------------------------status start functions main-----------------------------------------**#
 start_Model_1 = False
 start_Model_2 = False
+start_Model_3 = False
+Reset_Counters = False
+#** -------------------------------- startus for  Reset Founction Counter -------------------------------- **#
 #** -----------------------------------------------------------------------------------------------**#
 
+#** -------------------------------- main function start-----------------------------------------#
 while(1):
     while(1):
         success, img = cap.read()
@@ -87,15 +109,16 @@ while(1):
             imgGray, scaleFactor=1.05, minNeighbors=7)
         for (x, y, w, h) in numberPlates:
             area1 = w * h
+            #** -------------------------------- Functions Detected Number Plate-----------------------------------------**#
             if area1 > minArea and data2 == 0:
                 cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
                 imgRoi = img[y:y+h, x:x+w]
                 number = numberPlates[0]
                 if area1 > 100000 and data2 == 0:
                     state = 0
-                    print("Save Image")
+                    print("Find Number Plate OK")
                     cv2.imwrite(
-                        "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model"".jpg", imgRoi)
+                        "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model"".jpg", imgRoi)
 
                     def start_functions():
                         # print("Start Functions")
@@ -103,9 +126,10 @@ while(1):
                         data2 = 1
                         return data2
                     start_functions()
-                print(data2)
                 break
             break
+            #** ------------------------------- End of Function Number plate -------------------------------**#
+        #** -----------------------------------Functions ORC Number Plate-----------------------------------------**#
         if data2 == 1 and start_Model_1 == False and start_Model_2 == False and start_Model_3 == False:
             # print("Data 2 = 1")
             import cv2
@@ -113,24 +137,25 @@ while(1):
             import pytesseract
             import os
             from PIL import Image
-            pytesseract.pytesseract.tesseract_cmd = r"C://Program Files//Tesseract-OCR//tesseract.exe"
+            pytesseract.pytesseract.tesseract_cmd = r"C://Program Files (x86)//Tesseract-OCR//tesseract.exe"
             img = cv2.imread(
-                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model.jpg")
+                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model.jpg")
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             adaptive_threshold = cv2.adaptiveThreshold(
                 gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
             Model = pytesseract.image_to_string(
-                adaptive_threshold, lang='eng', config='--psm 3')
-            print(Model)
+                adaptive_threshold, lang='eng', config='--psm 10')
+            # print(Model)
             Model_number = (Model)
 
-            # **-----------------------------main confirm function start-----------------------------------#
+            # **-----------------------------Main Confirm Function Start-----------------------------------#
             if ("234500" in Model_number) == True:
                 def start_Model():
                     global start_Model_1
                     start_Model_1 = True
                     return start_Model_1
                 start_Model()
+                print("Model 234500 is detected")
                 break
             elif ("1234008" in Model_number) == True:
                 def start_Model1():
@@ -153,8 +178,18 @@ while(1):
                     return data2
                 Reset()
                 break
-        # **------------------------------end of confirm function start-------------------------------------------#
-        # **Start Model 1
+            #!! --- Not Found Model ---- #
+            else:
+                print("Model Not Found")
+
+                def Reset():
+                    global data2
+                    data2 = 0
+                    return data2
+                Reset()
+                break
+        # **------------------------------End of Confirm Function Start-------------------------------------------** #
+        # **------------------------------------Start Model 1-----------------------------------------------------** #
         while start_Model_1 == True:
             blur = cv2.blur(img, (25, 25))
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
@@ -200,10 +235,49 @@ while(1):
                                 cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
                                     img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
                         detect_line.remove((x, y))
+            #** ----------------------------------------- Functions Reset -------------------------------- **#
+            imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            numberPlates = plateCascade .detectMultiScale(
+                imgGray, scaleFactor=1.05, minNeighbors=7)
+            for (x, y, w, h) in numberPlates:
+                area1 = w * h
+                if area1 > minArea and Reset_Counters == False:
+                    cv2.rectangle(img, (x, y), (x+w, y+h), (255, 255, 0), 2)
+                    number = numberPlates[0]
+                    imRoi = img[y:y+h, x:x+w]
+                    if area1 > 100000 and Reset_Counters == False:
+                        cv2.imwrite(
+                            "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\RESET\\RESET.jpg", imgRoi)
+                        print(area1)
+
+                        def function_Reset():
+                            global Reset_Counters
+                            Reset_Counters = True
+                            return Reset_Counters
+                        function_Reset()
+                        break
+                    break
+            #** ----------------------------------------- Functions OCR Reset -------------------------------- **#
+            if Reset_Counters == True:
+                import cv2
+                import numpy as np
+                import pytesseract
+                import os
+                from PIL import Image
+                pytesseract.pytesseract.tesseract_cmd = r"C://Program Files (x86)//Tesseract-OCR//tesseract.exe"
+                img = cv2.imread(
+                    "C:\\Users\\nuttawut-put\\Desktop\\IIOT-B14\\Painting_Auto\\RESET\\RESET.jpg")
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                adaptive_threshold = cv2.adaptiveThreshold(
+                    gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
+                Model_Reset = pytesseract.image_to_string(
+                    adaptive_threshold, lang='eng', config='--psm 10')
+                print(Model_Reset)
+                break
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
-        #*------------------------------end of start model 1-------------------------------------------#
+        #*---------------------------------------End of Start Model 1-------------------------------------------#
         # * Start Model 2
         while start_Model_2 == True:
             blur = cv2.blur(img, (25, 25))
@@ -253,10 +327,10 @@ while(1):
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
-        #* -------------------------------------end Model 2---------------------------------------------#
+        #* -------------------------------------End of Start Model 2---------------------------------------------#
 
-        # * Start Model 3
-        while start_Model_2 == True:
+        #* ---Start Model 3--- *#
+        while start_Model_3 == True:
             blur = cv2.blur(img, (25, 25))
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
@@ -304,11 +378,13 @@ while(1):
             cv2.putText(img, str(counter), (550, 450),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             break
-        #** -------------------------------------end Model 3---------------------------------------------#
+        #** -------------------------------------End of Start Model 3---------------------------------------------#
+
+        #** -----------------------------------------Steam Show Counter System---------------------------------------------#
         cv2.imshow("IIOT-B14", img)
         if cv2.waitKey(1) & 0xFF == ord('s'):
             cv2.imwrite(
-                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model-"+str(count)+".jpg", img)
+                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model-"+str(count)+".jpg", img)
             cv2.rectangle(img, (0, 200), (640, 300), (0, 255, 0), cv2.FILLED)
             cv2.putText(img, "Scan Number", (15, 265),
                         cv2.FONT_HERSHEY_COMPLEX, 2, (0, 0, 255), 2)
