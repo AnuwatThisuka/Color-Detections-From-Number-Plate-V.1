@@ -87,7 +87,12 @@ left_line = x_line(img, counter_line)[1] - each_line
 
 
 #** ---function for counter line--- **#
-def countfunc(count):  # For Model 1
+# def countfunc(count):  # For Model 1
+#    global counter
+#    counter = counter + 1
+#    return counter
+
+def countfunc(count):  # For Model 3
     global counter
     counter = counter + 1
     return counter
@@ -99,17 +104,17 @@ def countfunc_2(count):  # For Model 2
     return counter_2
 
 
-#** -----------------------------------status start functions main-----------------------------------------**#
+#** ---status start functions main--- **#
 start_Model_1 = False
 start_Model_2 = False
 start_Model_3 = False
 Reset_Counters = False
-#** -------------------------------- startus for  Reset Founction Counter -------------------------------- **#
+#**---startus for  Reset Founction Counter--- **#
 #
 #
 #
 #
-#** -------------------------------- main function start-----------------------------------------#
+#** ---main function start--- **#
 while(1):
     while(1):
         success, img = cap.read()
@@ -118,7 +123,7 @@ while(1):
             imgGray, scaleFactor=1.05, minNeighbors=7)
         for (x, y, w, h) in numberPlates:
             area1 = w * h
-            #** -------------------------------- Functions Detected Number Plate-----------------------------------------**#
+            #** ---Functions Detected Number Plate ---**#
             if area1 > minArea and data2 == 0:
                 cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
                 imgRoi = img[y:y+h, x:x+w]
@@ -155,7 +160,6 @@ while(1):
                 gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
             Model = pytesseract.image_to_string(
                 adaptive_threshold, lang='eng', config='--psm 10')
-            # print(Model)
             Model_number = (Model)
 
             #** ----------------------------- Main Confirm Function Start For First Run System ----------------------------------- **#
@@ -245,7 +249,9 @@ while(1):
                                 img, counter_line)[2], img.shape[0]-bord), (0, 255, 0), 2)
                             if (x < x_line(img, counter_line)[1]) and state == 1:
                                 state = 0
-                                countfunc(count)
+                                # countfunc(count)
+                                count += 1
+                                print(count)
                                 cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
                                     img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
                         detect_line.remove((x, y))
@@ -333,18 +339,18 @@ while(1):
                     Reset_1()
                     print("Model not found")
                     break
-            cv2.putText(img, str(counter), (550, 400),
+            cv2.putText(img, str(count), (550, 400),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
             cv2.putText(img, str("Model: 234500"), (20, 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
             break
          #** ----------------------------------------- End of Functions OCR Reset -------------------------------- **#
-        #*---------------------------------------End of Start Model 1-------------------------------------------#
+        #*------------------------------------------------End of Start Model 1---------------------------------------#
         #
         #
         #
         #*--- Start Model 2 ---**#
-        while start_Model_2 == True:  # Model 1234008
+        while start_Model_2 == True:
             blur = cv2.blur(img, (25, 25))
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 

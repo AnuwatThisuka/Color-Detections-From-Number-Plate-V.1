@@ -1,14 +1,21 @@
+import json
 from flask import Flask
 from flask import render_template
 from flask import Response
+from flask import url_for
+import cv2
+#  -------------------------------------------------------------
+#   (IIOT-B14) SNC Former Public Company Limited All rights reserved.
+#   This file is part of the IIOT-B14 project. Counter part of line "Painting B14"
+#   Created by : IIOT-B14 on 2022/06/06
+#  -------------------------------------------------------------
+
 from matplotlib.pyplot import gray
 import re
 from itertools import count
 from re import A
 import cv2
 import numpy as np
-
-app = Flask(__name__)
 
 #** --- Set frame --- **#
 frameWidth = 640  # Frame Width
@@ -36,8 +43,7 @@ blurr = 10
 bord = 10
 error = 100
 detect_line = []
-counter = 0
-counter_2 = 0
+
 state = 0
 #** -------------------------------- lower color detection --------------------------------#
 h_lower = 94
@@ -73,20 +79,7 @@ state = 0
 data2 = 0
 loop = True
 success, img = cap.read()
-
-
-#** ---function for counter line--- **#
-def countfunc(count):  # For Model 1
-    global counter
-    counter = counter + 1
-    return counter
-
-
-def countfunc_2(count):  # For Model 2
-    global counter_2
-    counter_2 = counter_2 + 1
-    return counter_2
-
+# left_line = x_line(img, counter_line)[1] - each_line
 
 #** -----------------------------------status start functions main-----------------------------------------**#
 start_Model_1 = False
@@ -94,20 +87,53 @@ start_Model_2 = False
 start_Model_3 = False
 Reset_Counters = False
 #** -------------------------------- startus for  Reset Founction Counter -------------------------------- **#
+#
+#
+#
+#
+#** -------------------------------- main function start-----------------------------------------#
+
+app = Flask(__name__)
 
 
 def steam():
-    from matplotlib.pyplot import gray
-    success, img = cap.read()
-    #!! -- Define counter line--- !!#
+    import cv2
+    from itertools import count
+    count = 0
+    #!! --- Define center point of detected --- !!#
 
+    def center_point(x, y, w, h):
+        ww = int(w/2)
+        hh = int(h/2)
+        cx = int(x+ww)
+        cy = int(y+hh)
+        return cx, cy
+    #!!-------------------------------------------------------------------------------------#
+
+    #** ---function for counter --- **#
+    counter = 0
+
+    def countfunc(count):  # For Model 1
+        global counter
+        counter = counter + 1
+        return counter
+
+    counter_2 = 0
+
+    def countfunc_2(count):  # For Model 2
+        global counter_2
+        counter_2 = counter_2 + 1
+        return counter_2
+
+    #!! -- Define counter line--- !!#
     def x_line(img, percent):
         posit = int((img.shape[1]*percent)/100)
         left_line = posit - each_line
         right_line = posit + each_line
         return posit, left_line, right_line
-    left_line = x_line(img, counter_line)[1] - each_line
 #!!-------------------------------------------------------------------------------------#
+    success, img = cap.read()
+    left_line = x_line(img, counter_line)[1] - each_line
     while(1):
         while(1):
             success, img = cap.read()
@@ -123,7 +149,6 @@ def steam():
                     number = numberPlates[0]
                     if area1 > 60000 and data2 == 0:
                         state = 0
-                        print("Model Detected")
                         cv2.imwrite(
                             "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model"".jpg", imgRoi)
 
@@ -132,6 +157,7 @@ def steam():
                             data2 = 1
                             return data2
                         start_functions()
+                        print("Model Detected")
                     break
                 break
                 #** ------------------------------- End of Function Number plate -------------------------------**#
@@ -203,7 +229,18 @@ def steam():
             #
             #
             # **--------------------------------------Start Model 1---------------------------------------------------** #
-            while start_Model_1 == True:  # Model 234500
+
+            def test_function():
+                global count11
+                count11 = 0
+                return count11
+            test_function()
+            while start_Model_1 == True:
+                def test_function():
+                    global count11
+                    count11 = 0
+                    return count11
+                (test_function())  # Model 234500
                 blur = cv2.blur(img, (25, 25))
                 hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
@@ -243,7 +280,10 @@ def steam():
                                     img, counter_line)[2], img.shape[0]-bord), (0, 255, 0), 2)
                                 if (x < x_line(img, counter_line)[1]) and state == 1:
                                     state = 0
-                                    countfunc(count)
+                                    count += 1
+                                    # countfunc(count)
+                                    # print(counter)
+                                    #------------------- End of functions counter ------------------#
                                     cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
                                         img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
                             detect_line.remove((x, y))
@@ -332,7 +372,7 @@ def steam():
                         Reset_1()
                         print("Model not found")
                         break
-                cv2.putText(img, str(counter), (550, 400),
+                cv2.putText(img, str(count), (550, 400),
                             cv2.FONT_HERSHEY_SIMPLEX, 2, text_color, 3, cv2.LINE_AA)
                 cv2.putText(img, str("Model: 234500"), (20, 50),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
@@ -490,11 +530,25 @@ def steam():
                             cv2.FONT_HERSHEY_COMPLEX, 2, (0, 0, 255), 2)
                 cv2.waitKey(500)
                 count += 1
+                cap.release()
+                cap.destroyAllWindows()
+            if not success:
+                break
+            else:
+                success, buffer = cv2.imencode('.jpg', img)
+                img = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + img + b'\r\n')
 
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/planing")
+def planing():
+    return render_template("planing.html")
 
 
 @app.route("/video_feed")
@@ -503,4 +557,4 @@ def video_feed():
 
 
 if __name__ == "__main__":
-    app.run(host='localhost', port=8080, debug=True)
+    app.run(host='localhost', port=8080)
