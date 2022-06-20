@@ -5,6 +5,7 @@
 #  -------------------------------------------------------------
 
 from cProfile import run
+from operator import imatmul
 from pyexpat import model
 from tkinter import *
 from tkinter import filedialog
@@ -22,7 +23,7 @@ from itertools import count
 
 plateCascade = cv2.CascadeClassifier(
     "haarcascade_russian_plate_number.xml")
-#faceClassif = cv2.CascadeClassifier("haarcascade_russian_plate_number.xml")
+# faceClassif = cv2.CascadeClassifier("haarcascade_russian_plate_number.xml")
 
 cap = None
 root = tk.Tk()
@@ -64,6 +65,8 @@ start_Model_5 = False
 start_Model_6 = False
 Reset_Counters = False
 #** -------------------------------- startus for  Reset Founction Counter -------------------------------- **#
+
+status = 0
 
 
 def center_point(x, y, w, h):
@@ -248,8 +251,9 @@ def auto():
     from PIL import Image
     from PIL import ImageTk
     count = 0
+    status = 0
 
-    #print("Auto is Running...")
+    # print("Auto is Running...")
 
     def countfunc(count):
         global counter
@@ -265,7 +269,7 @@ def auto():
                    anchor="center")
     while run_model1 == 0:  # For Model H36TL2 Blue
         ret, img = cap.read()
-        #img = cv2.flip(img1, 0)
+        # img = cv2.flip(img1, 0)
         imgray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         numberPlates = plateCascade.detectMultiScale(
             imgray, scaleFactor=1.05, minNeighbors=7)
@@ -278,7 +282,7 @@ def auto():
                 if area1 > 60000 and data2 == 0:
                     state = 0
                     cv2.imwrite(
-                        "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model"".jpg", imgRoi)
+                        "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model"".jpg", imgRoi)
 
                     def start_functions():
                         global data2
@@ -286,10 +290,11 @@ def auto():
                         return data2
                     start_functions()
                     print("Model Detected")
+                    print(data2)
                     break
                 break
             break
-        if data2 == 1 and start_Model_1 == False and start_Model_2 == False and start_Model_3 == False and start_Model_4 == False and start_Model_5 == False and start_Model_6 == False:
+        while(data2 == 1):
             import cv2
             import numpy as np
             import pytesseract
@@ -297,7 +302,7 @@ def auto():
             from PIL import Image
             pytesseract.pytesseract.tesseract_cmd = r"C://Program Files//Tesseract-OCR//tesseract.exe"
             img = cv2.imread(
-                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\IMAGE\\Model.jpg")
+                "C:\\Users\\Acer\\Desktop\\IIOT-B14-Project\\Auto_Paining\\Model\\Model.jpg")
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             adaptive_threshold = cv2.adaptiveThreshold(
                 gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
@@ -309,17 +314,19 @@ def auto():
             #** ----------------------------- Main Confirm Function Start For First Run System ----------------------------------- **#
             if ("234500" in Model_number) == True:
                 def start_Model():
-                    global start_Model_1
+                    global start_Model_1, start_Model_2
                     start_Model_1 = True
-                    return start_Model_1
+                    start_Model_2 = False
+                    return start_Model_1, start_Model_2
                 start_Model()
-                #print("Model 234500 is detected")
+                # print("Model 234500 is detected")
                 break
-            elif ("123432" in Model_number) == True:
+            elif ("1234008" in Model_number) == True:
                 def start_Model1():
-                    global start_Model_2
+                    global start_Model_1, start_Model_2
+                    start_Model_1 = False
                     start_Model_2 = True
-                    return start_Model_2
+                    return start_Model_1, start_Model_2
                 start_Model1()
                 print("Model 1234008 is detected")
                 break
@@ -386,8 +393,6 @@ def auto():
                 Reset()
                 break
         while start_Model_1 == True:
-            print("Model 1 Started is Detected")
-
             def auto_model_1():  # color detected for Model H46TL2R
                 global model1lower, model1upper, Name_Model, running
                 model1lower = [94, 36, 134]
@@ -426,11 +431,96 @@ def auto():
                            anchor="center")
             break
 
-        while running == 1:
-            print(model1lower, model1upper)
-            break
+        if running == 1:
+            count = 0
+            status = 0
+            import numpy as np
 
-        #cv2.imshow("img", img)
+            def set_data():
+                global data2
+                data2 = 0
+                return data2
+            set_data()
+
+            def countfunc(count):
+                global counter
+                counter = counter + 1
+                return counter
+            while(1):
+                ret, img = cap.read()
+                blur = cv2.blur(img, (25, 25))
+                hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+
+                lower = np.array(model1lower, np.uint8)
+                upper = np.array(model1upper, np.uint8)
+
+                blue = cv2.inRange(hsv, lower, upper)
+                kernal = np.ones((5, 5), "uint8")
+                blue = cv2.dilate(blue, kernal)
+                res_blue = cv2.bitwise_and(img, img, mask=blue)
+                cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
+                    img, counter_line)[0], img.shape[0]-bord), (255, 0, 0), 2)
+                cv2.line(img, (x_line(img, counter_line)[1], bord), (x_line(
+                    img, counter_line)[1], img.shape[0]-bord), (255, 0, 0), 2)
+                cv2.line(img, (x_line(img, counter_line)[2], bord), (x_line(
+                    img, counter_line)[2], img.shape[0]-bord), (255, 0, 0), 2)
+                contours, hierarchy = cv2.findContours(
+                    blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                for contour in contours:
+                    area = cv2.contourArea(contour)
+                    if(area > 10000):
+                        x, y, w, h = cv2.boundingRect(contour)
+                        center = center_point(x, y, w, h)
+                        cv2.circle(img, center, 5, (0, 0, 255), -1)
+                        img = cv2.rectangle(
+                            img, (x, y), (x + w, y + h), object_color, 2)
+                        detect_line.append(center)
+                        for x, y in detect_line:
+                            def set_defult_status():
+                                global status
+                                status = 0
+                                return status
+                            set_defult_status()
+                            if (x < x_line(img, counter_line)[2] and x > x_line(img, counter_line)[0] and status == 0):
+                                def set_defult_status_1():
+                                    global status
+                                    status = 1
+                                    return status
+                                set_defult_status_1()
+                                # print(state)
+                            if (x < x_line(img, counter_line)[2] and x > x_line(img, counter_line)[1]-20):
+                                cv2.line(img, (x_line(img, counter_line)[1], bord), (x_line(
+                                    img, counter_line)[1], img.shape[0]-bord), (0, 255, 0), 2)
+                                cv2.line(img, (x_line(img, counter_line)[2], bord), (x_line(
+                                    img, counter_line)[2], img.shape[0]-bord), (0, 255, 0), 2)
+                                print("xxx")
+                                if (x < x_line(img, counter_line)[1]) and status == 1:
+                                    def set_defult_status_2():
+                                        global status
+                                        status = 0
+                                        return status
+                                    set_defult_status_2()
+                                    countfunc(count)
+                                    #count += 1
+                                    print(counter)
+                                    cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
+                                        img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
+                            detect_line.remove((x, y))
+            #cv2.imshow("img", img)
+                img = imutils.resize(img, width=400)
+                frame = Image.fromarray(img)
+                imgtk = ImageTk.PhotoImage(image=frame)
+                lblVideo.imgtk = imgtk
+                lblVideo.configure(image=imgtk)
+                lblVideo.after(10, auto)
+                return img
+            img = imutils.resize(img, width=400)
+            frame = Image.fromarray(img)
+            imgtk = ImageTk.PhotoImage(image=frame)
+            lblVideo.imgtk = imgtk
+            lblVideo.configure(image=imgtk)
+            lblVideo.after(10, auto)
+            return img
         img = imutils.resize(img, width=400)
         frame = Image.fromarray(img)
         imgtk = ImageTk.PhotoImage(image=frame)
@@ -438,13 +528,6 @@ def auto():
         lblVideo.configure(image=imgtk)
         lblVideo.after(10, auto)
         return img
-    img = imutils.resize(img, width=400)
-    frame = Image.fromarray(img)
-    imgtk = ImageTk.PhotoImage(image=frame)
-    lblVideo.imgtk = imgtk
-    lblVideo.configure(image=imgtk)
-    lblVideo.after(10, auto)
-    return img
 
 
 def Manual():
@@ -520,7 +603,7 @@ def Manual():
                             cv2.line(img, (x_line(img, counter_line)[0], bord), (x_line(
                                 img, counter_line)[0], img.shape[0]-bord), (0, 250, 0), 5)
                     detect_line.remove((x, y))
-        #cv2.imshow("img", img)
+        # cv2.imshow("img", img)
         img2 = imutils.resize(img, width=400)
         frame = Image.fromarray(img2)
         imgtk = ImageTk.PhotoImage(image=frame)
