@@ -1,5 +1,5 @@
 #  -------------------------------------------------------------
-#   (IIOT-B14) SNC Former Public Company Limited All rights reserved.
+#   (IIOT-B14) All rights reserved.
 #   This file is part of the IIOT-B14 project. Counter part of line "Painting B14"
 #   Created by : IIOT-B14 on 2022/06/06
 #  -------------------------------------------------------------
